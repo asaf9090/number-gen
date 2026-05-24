@@ -241,16 +241,14 @@ export default function App() {
 
         {/* HEADER */}
         <div style={{ background: `linear-gradient(135deg,${CARD},#0a1020)`,
-          padding: "13px 14px 11px",
+          padding: "11px 12px 9px",
           borderBottom: `1px solid rgba(79,124,255,0.2)`,
           display: "flex", alignItems: "center", gap: 10 }}>
           <span style={{ fontSize: 22 }}>🎰</span>
           <div>
             <div style={{ fontSize: 15, fontWeight: 900, color: TXT, letterSpacing: 1.5,
               textTransform: "uppercase" }}>Number Generator</div>
-            <div style={{ fontSize: 9, color: BLUE, letterSpacing: 2, marginTop: 1 }}>
-              LOTTO PICK WHEELER
-            </div>
+            
           </div>
         </div>
 
