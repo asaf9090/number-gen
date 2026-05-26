@@ -1,4 +1,4 @@
-const CACHE_NAME = "lotto-wheeler-v1";
+
 const ASSETS = ["/", "/index.html", "/manifest.json"];
 
 self.addEventListener("install", (e) => {
