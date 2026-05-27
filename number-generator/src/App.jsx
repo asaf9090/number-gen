@@ -241,7 +241,7 @@ export default function App() {
 
         {/* HEADER */}
         <div style={{ background: `linear-gradient(135deg,${CARD},#0a1020)`,
-          padding: "11px 12px 9px",
+          padding: "12px 13px 10px",
           borderBottom: `1px solid rgba(79,124,255,0.2)`,
           display: "flex", alignItems: "center", gap: 10 }}>
           <span style={{ fontSize: 22 }}>🎰</span>
@@ -261,7 +261,7 @@ export default function App() {
             const on = cat === k;
             return (
               <button key={k} onClick={() => switchCat(k)} style={{
-                flex: 1, padding: "8px 10px",
+                flex: 1, padding: "5px 8px",
                 border: on ? "none" : `1px solid rgba(79,124,255,0.2)`,
                 borderRadius: 8, cursor: "pointer",
                 fontWeight: 800, fontSize: 13, fontFamily: "inherit",
