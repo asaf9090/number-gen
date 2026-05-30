@@ -1,18 +1,18 @@
 import { useState, useEffect } from "react";
-// Adsterra Ad Component
 const AdsterraBanner = ({ id }) => {
   useEffect(() => {
-    const script = document.createElement("script");
-    script.src = `//www.highperformanceformat.com/${id}/invoke.js`;
-    script.async = true;
-    script.setAttribute("data-cfasync", "false");
-    document.body.appendChild(script);
-    return () => {
-      const container = document.getElementById(`container-${id}`);
-      if (container) container.innerHTML = "";
-    };
+    const container = document.getElementById(`ad-slot-${id}`);
+    // যদি কন্টেইনার খালি থাকে, তবেই বিজ্ঞাপন লোড করবে (এটিই অ্যাপ সাদা হওয়া আটকাবে)
+    if (container && container.innerHTML === "") {
+      const script = document.createElement("script");
+      script.src = `//www.highperformanceformat.com/${id}/invoke.js`;
+      script.async = true;
+      script.setAttribute("data-cfasync", "false");
+      container.appendChild(script);
+    }
   }, [id]);
-  return <div id={`container-${id}`}></div>;
+
+  return <div id={`ad-slot-${id}`} style={{ minHeight: "60px", textAlign: "center" }}></div>;
 };
 const BG    = "#080c14";
 const CARD   = "#0f1623";
@@ -333,12 +333,12 @@ export default function App() {
             🔗 Share
           </button>
         </div>
-
-        {/* AD SLOT */}
         {/* AD SLOT */}
 <div style={{ padding: "10px", textAlign: "center", minHeight: "60px" }}>
   <AdsterraBanner id="3313991" />
 </div>
+
+ 
 
         {/* CAT TABS */}
         <div style={{ padding: "0 10px 8px", display: "flex", gap: 6 }}>
