@@ -30,7 +30,7 @@ function classify3(a, b, c) {
   return "single";
 }
 
-// Returns all permutations as 3-char strings (including leading zeros like "012")
+// Returns all permutations as 3-char strings
 function perms3(a, b, c) {
   const set = new Set();
   const arr = [a, b, c];
@@ -50,11 +50,20 @@ function perms2(a, b) {
   return [...set].sort();
 }
 
-// Cut pair: if both digits appear ANYWHERE in the number → exclude
+// আপডেট করা কাট পেয়ার লজিক (২D আগের মতো থাকবে, ৩D-তে যেকোনো জায়গায় ডিজিট দুটি থাকলে বাদ যাবে)
 function hasCutPair(numStr, pair) {
   const p = pair.trim();
   if (p.length !== 2) return false;
-  return numStr.includes(p[0]) && numStr.includes(p[1]);
+  
+  // ২D নাম্বারের ক্ষেত্রে আগের মতো সাধারণ চেক
+  if (numStr.length === 2) {
+    return numStr.includes(p);
+  }
+  
+  // ৩D নাম্বারের ক্ষেত্রে (সিঙ্গেল ও সম নাম্বার) ডিজিট দুটি আলাদাভাবে চেক হবে
+  const digit1 = p[0];
+  const digit2 = p[1];
+  return numStr.includes(digit1) && numStr.includes(digit2);
 }
 
 function copyText(text, cb) {
@@ -128,17 +137,16 @@ export default function App() {
     setCutIn("");
   }
 
-  // Core exclusion: called at generate time with current cuts state
   function isExcluded(numStr, cutList) {
     return cutList.some(p => hasCutPair(numStr, p));
   }
 
-  function generate() {
+  function create() {
     if (digits.size < 2) { pop("⚠ Select at least 2 digits"); return; }
-    cat === "3d" ? gen3(cuts) : gen2(cuts);
+    cat === "3d" ? create3(cuts) : create2(cuts);
   }
 
-  function gen3(cutList) {
+  function create3(cutList) {
     const dg = [...digits].sort((a, b) => a - b);
     const seen = new Set(), ramble = [], groups = [];
 
@@ -152,22 +160,35 @@ export default function App() {
           if (seen.has(key)) continue;
           seen.add(key);
 
-          // get all perms, filter by cut pairs
           const allPs = perms3(a, b, c);
+          
+          // এখানে প্রতিটা পারমিউটেশনের ওপর আলাদাভাবে কাট পেয়ার চেক হবে
           const ps = cutList.length > 0
             ? allPs.filter(n => !isExcluded(n, cutList))
             : allPs;
 
           if (!ps.length) continue;
+          
           ramble.push({ num: ps[0], tp, total: totalOf(ps[0]) });
           groups.push({ base: ps[0], perms: ps.map(n => ({ num: n, tp, total: totalOf(n) })) });
         }
 
     if (!ramble.length) { pop("No numbers found"); return; }
-    setResult({ ramble, groups });
+    
+    // Ramble ভিউতে ডুপ্লিকেট এড়াতে ফিল্টারিং লজিক
+    const finalRamble = [];
+    const rambleSeen = new Set();
+    ramble.forEach(x => {
+      if (!rambleSeen.has(x.num)) {
+        rambleSeen.add(x.num);
+        finalRamble.push(x);
+      }
+    });
+
+    setResult({ ramble: finalRamble, groups });
   }
 
-  function gen2(cutList) {
+  function create2(cutList) {
     const dg = [...digits].sort((a, b) => a - b);
     const seen = new Set(), ramble = [], groups = [];
 
@@ -179,14 +200,31 @@ export default function App() {
         const key = [a, b].sort().join("");
         if (seen.has(key)) continue;
         seen.add(key);
-        const ps = a === b ? [`${a}${a}`] : perms2(a, b);
+        
+        const allPs = a === b ? [`${a}${a}`] : perms2(a, b);
+        
+        // ২D-এর কাট পেয়ার ফিল্টারিং (২D যেমন ছিল তেমনই থাকবে)
+        const ps = cutList.length > 0
+          ? allPs.filter(n => !isExcluded(n, cutList))
+          : allPs;
+          
         if (!ps.length) continue;
         ramble.push({ num: ps[0], tp, total: totalOf(ps[0]) });
         groups.push({ base: ps[0], perms: ps.map(n => ({ num: n, tp, total: totalOf(n) })) });
       }
 
     if (!ramble.length) { pop("No numbers found"); return; }
-    setResult({ ramble, groups });
+    
+    const finalRamble = [];
+    const rambleSeen = new Set();
+    ramble.forEach(x => {
+      if (!rambleSeen.has(x.num)) {
+        rambleSeen.add(x.num);
+        finalRamble.push(x);
+      }
+    });
+
+    setResult({ ramble: finalRamble, groups });
   }
 
   function reset() {
@@ -240,16 +278,46 @@ export default function App() {
       <div style={{ width: "100%", maxWidth: 430, display: "flex", flexDirection: "column" }}>
 
         {/* HEADER */}
-        <div style={{ background: `linear-gradient(135deg,${CARD},#0a1020)`,
+        <div style={{ 
+          background: `linear-gradient(135deg,${CARD},#0a1020)`,
           padding: "12px 13px 10px",
           borderBottom: `1px solid rgba(79,124,255,0.2)`,
-          display: "flex", alignItems: "center", gap: 10 }}>
-          <span style={{ fontSize: 22 }}>🎰</span>
-          <div>
-            <div style={{ fontSize: 15, fontWeight: 900, color: TXT, letterSpacing: 1.5,
-              textTransform: "uppercase" }}>Number Generator</div>
-            
+          display: "flex", 
+          alignItems: "center", 
+          justifyContent: "space-between", 
+          gap: 10 
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span style={{ fontSize: 22 }}>🎰</span>
+            <div>
+              <div style={{ fontSize: 15, fontWeight: 900, color: TXT, letterSpacing: 1.5,
+                textTransform: "uppercase" }}>Number Creator</div>
+            </div>
           </div>
+
+          {/* SHARE LINK BUTTON */}
+          <button 
+            onClick={() => {
+              const currentUrl = window.location.href;
+              copyText(currentUrl, () => pop("✓ Link copied to clipboard!"));
+            }}
+            style={{
+              background: "rgba(79,124,255,0.1)",
+              border: `1px solid rgba(79,124,255,0.3)`,
+              borderRadius: 6,
+              color: BLUE,
+              padding: "5px 10px",
+              fontSize: 11,
+              fontWeight: 700,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+              transition: "all 0.2s"
+            }}
+          >
+            🔗 Share
+          </button>
         </div>
 
         {/* AD SLOT */}
@@ -340,60 +408,58 @@ export default function App() {
           </div>
 
           {/* CUT PAIR */}
-          {cat === "3d" && (
-            <div style={{ background: CARD, borderRadius: 12, padding: "9px 10px",
-              marginBottom: 8, border: `1px solid rgba(255,71,87,0.2)` }}>
-              <div style={{ fontSize: 10, fontWeight: 800, color: RED,
-                letterSpacing: 2, marginBottom: 8, textTransform: "uppercase",
-                textShadow: `0 0 10px ${RED}88` }}>
-                ✂ Cut Pair
-                <span style={{ color: TXTS, fontWeight: 400, fontSize: 9,
-                  textTransform: "none", marginLeft: 6 }}>(3D Only)</span>
-              </div>
-              <div style={{ display: "flex", gap: 5 }}>
-                <input
-                  type="text" inputMode="numeric" maxLength={2}
-                  value={cutIn}
-                  onChange={e => setCutIn(e.target.value.replace(/\D/g, "").slice(0, 2))}
-                  onKeyDown={e => e.key === "Enter" && addCut()}
-                  placeholder="Enter 2 digits"
-                  style={{
-                    flex: 1, padding: "7px 10px", borderRadius: 7,
-                    border: `1px solid rgba(255,71,87,0.3)`,
-                    background: "rgba(255,71,87,0.06)", color: TXT,
-                    fontSize: 14, fontWeight: 700, outline: "none",
-                    fontFamily: "inherit", letterSpacing: 2,
-                  }}
-                />
-                <button onClick={addCut} style={{
-                  padding: "7px 14px", border: "none", borderRadius: 7,
-                  cursor: "pointer", background: RED, color: "#fff",
-                  fontSize: 11, fontWeight: 800, whiteSpace: "nowrap",
-                  boxShadow: `0 0 12px ${RED}66`,
-                }}>+ Add</button>
-              </div>
-              {cuts.length > 0 && (
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: 8 }}>
-                  {cuts.map(p => (
-                    <div key={p} style={{
-                      display: "flex", alignItems: "center", gap: 3,
-                      background: "rgba(255,71,87,0.12)",
-                      border: `1px solid ${RED}`,
-                      borderRadius: 6, padding: "3px 8px",
-                    }}>
-                      <span style={{ fontSize: 12, fontWeight: 800, color: RED,
-                        fontFamily: "monospace", letterSpacing: 3 }}>{p}</span>
-                      <button onClick={() => setCuts(prev => prev.filter(x => x !== p))}
-                        style={{ background: "none", border: "none", cursor: "pointer",
-                          color: RED, fontSize: 14, fontWeight: 900, padding: 0, lineHeight: 1 }}>
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
+          <div style={{ background: CARD, borderRadius: 12, padding: "9px 10px",
+            marginBottom: 8, border: `1px solid rgba(255,71,87,0.2)` }}>
+            <div style={{ fontSize: 10, fontWeight: 800, color: RED,
+              letterSpacing: 2, marginBottom: 8, textTransform: "uppercase",
+              textShadow: `0 0 10px ${RED}88` }}>
+              ✂ Cut Pair
+              <span style={{ color: TXTS, fontWeight: 400, fontSize: 9,
+                textTransform: "none", marginLeft: 6 }}>({cat.toUpperCase()} Mode)</span>
             </div>
-          )}
+            <div style={{ display: "flex", gap: 5 }}>
+              <input
+                type="text" inputMode="numeric" maxLength={2}
+                value={cutIn}
+                onChange={e => setCutIn(e.target.value.replace(/\D/g, "").slice(0, 2))}
+                onKeyDown={e => e.key === "Enter" && addCut()}
+                placeholder="Enter 2 digits"
+                style={{
+                  flex: 1, padding: "7px 10px", borderRadius: 7,
+                  border: `1px solid rgba(255,71,87,0.3)`,
+                  background: "rgba(255,71,87,0.06)", color: TXT,
+                  fontSize: 14, fontWeight: 700, outline: "none",
+                  fontFamily: "inherit", letterSpacing: 2,
+                }}
+              />
+              <button onClick={addCut} style={{
+                padding: "7px 14px", border: "none", borderRadius: 7,
+                cursor: "pointer", background: RED, color: "#fff",
+                fontSize: 11, fontWeight: 800, whiteSpace: "nowrap",
+                boxShadow: `0 0 12px ${RED}66`,
+              }}>+ Add</button>
+            </div>
+            {cuts.length > 0 && (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: 8 }}>
+                {cuts.map(p => (
+                  <div key={p} style={{
+                    display: "flex", alignItems: "center", gap: 3,
+                    background: "rgba(255,71,87,0.12)",
+                    border: `1px solid ${RED}`,
+                    borderRadius: 6, padding: "3px 8px",
+                  }}>
+                    <span style={{ fontSize: 12, fontWeight: 800, color: RED,
+                      fontFamily: "monospace", letterSpacing: 3 }}>{p}</span>
+                    <button onClick={() => setCuts(prev => prev.filter(x => x !== p))}
+                      style={{ background: "none", border: "none", cursor: "pointer",
+                        color: RED, fontSize: 14, fontWeight: 900, padding: 0, lineHeight: 1 }}>
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* MODE | VIEW */}
           <div style={{ background: CARD, borderRadius: 12, padding: "8px 10px",
@@ -450,15 +516,15 @@ export default function App() {
             </div>
           </div>
 
-          {/* GENERATE */}
-          <button onClick={generate} style={{
+          {/* CREATE BUTTON */}
+          <button onClick={create} style={{
             width: "100%", padding: "10px", border: "none", borderRadius: 10,
             fontSize: 14, fontWeight: 900, cursor: "pointer", letterSpacing: 1.5,
             background: `linear-gradient(135deg,${BLUE},${BLUE2})`,
             color: "#fff",
             boxShadow: `0 4px 20px rgba(79,124,255,0.5)`,
             marginBottom: 10, textTransform: "uppercase",
-          }}>⚡ Generate {cat.toUpperCase()}</button>
+          }}>⚡ Create {cat.toUpperCase()}</button>
 
           {/* OUTPUT */}
           <div style={{ background: CARD, borderRadius: 12, padding: "12px",
@@ -468,7 +534,7 @@ export default function App() {
             {!result && (
               <div style={{ color: "#1a2340", fontSize: 12, textAlign: "center",
                 padding: "80px 0", letterSpacing: 1 }}>
-                Select Numbers to Generate
+                Select Numbers to Create
               </div>
             )}
 

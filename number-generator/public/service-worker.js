@@ -1,6 +1,6 @@
 
 // আপনার ক্যাশ মেমরির নাম (ভার্সন পরিবর্তন করলে এটি পরিবর্তন করবেন)
-const CACHE_NAME = "n-gen-v1";
+const CACHE_NAME = "n-creator-v1";
 
 // 🛠️ এখানে শুধু "/icon.svg" ফাইলটি যোগ করে দেওয়া হয়েছে
 const ASSETS = [
