@@ -1,5 +1,19 @@
 import { useState, useEffect } from "react";
-
+// Adsterra Ad Component
+const AdsterraBanner = ({ id }) => {
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = `//www.highperformanceformat.com/${id}/invoke.js`;
+    script.async = true;
+    script.setAttribute("data-cfasync", "false");
+    document.body.appendChild(script);
+    return () => {
+      const container = document.getElementById(`container-${id}`);
+      if (container) container.innerHTML = "";
+    };
+  }, [id]);
+  return <div id={`container-${id}`}></div>;
+};
 const BG    = "#080c14";
 const CARD   = "#0f1623";
 const CARD2  = "#161f30";
@@ -321,7 +335,10 @@ export default function App() {
         </div>
 
         {/* AD SLOT */}
-        <div style={{ width: "100%", height: 50, background: "transparent" }} />
+        {/* AD SLOT */}
+<div style={{ padding: "10px", textAlign: "center", minHeight: "60px" }}>
+  <AdsterraBanner id="3313991" />
+</div>
 
         {/* CAT TABS */}
         <div style={{ padding: "0 10px 8px", display: "flex", gap: 6 }}>
