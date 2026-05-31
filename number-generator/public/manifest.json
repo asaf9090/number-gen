@@ -1,7 +1,7 @@
 {
   "name": "Number Creator - 2D/3D Generator",
   "short_name": "Number Creator",
-  "description": "Generate 2D and 3D lottery numbers with advanced filtering and cut pair management",
+  "description": "Generate 2D and 3D numbers with advanced filtering and cut pair management",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#080c14",
