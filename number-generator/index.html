@@ -2,12 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#4f7cff">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="theme-color" content="#080c14">
+    <meta name="color-scheme" content="dark">
     <meta name="description" content="Generate 2D and 3D lottery numbers with advanced filtering and cut pair management">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Number Creator">
+    <meta name="apple-mobile-web-app-status-bar" content="black">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="msapplication-navbutton-color" content="#080c14">
+    <meta name="msapplication-TileColor" content="#080c14">
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23080c14' width='192' height='192'/><text x='96' y='120' font-size='100' text-anchor='middle' fill='%234f7cff' font-weight='bold'>🎰</text></svg>">
     <title>Number Creator - 2D/3D Generator</title>
@@ -17,15 +22,29 @@
             padding: 0;
             box-sizing: border-box;
         }
+        
+        html, body, #root {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        
         body {
             background: #080c14;
             font-family: -apple-system, 'Segoe UI', sans-serif;
             color: #f0f6ff;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
         }
+        
         #root {
             display: flex;
             justify-content: center;
             min-height: 100vh;
+            max-height: 100vh;
         }
     </style>
 </head>
