@@ -13,13 +13,6 @@ const AMBER  = "#ffb020";
 const TXT    = "#f0f6ff";
 const TXTS   = "#6b7a99";
 
-// Register PWA service worker
-if (typeof window !== "undefined" && "serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/service-worker.js").catch(() => {});
-  });
-}
-
 function totalOf(s) {
   return s.split("").map(Number).reduce((a, b) => a + b, 0) % 10;
 }
@@ -30,7 +23,6 @@ function classify3(a, b, c) {
   return "single";
 }
 
-// Returns all permutations as 3-char strings
 function perms3(a, b, c) {
   const set = new Set();
   const arr = [a, b, c];
@@ -50,17 +42,14 @@ function perms2(a, b) {
   return [...set].sort();
 }
 
-// আপডেট করা কাট পেয়ার লজিক (২D আগের মতো থাকবে, ৩D-তে যেকোনো জায়গায় ডিজিট দুটি থাকলে বাদ যাবে)
 function hasCutPair(numStr, pair) {
   const p = pair.trim();
   if (p.length !== 2) return false;
   
-  // ২D নাম্বারের ক্ষেত্রে আগের মতো সাধারণ চেক
   if (numStr.length === 2) {
     return numStr.includes(p);
   }
   
-  // ৩D নাম্বারের ক্ষেত্রে (সিঙ্গেল ও সম নাম্বার) ডিজিট দুটি আলাদাভাবে চেক হবে
   const digit1 = p[0];
   const digit2 = p[1];
   return numStr.includes(digit1) && numStr.includes(digit2);
@@ -73,6 +62,7 @@ function copyText(text, cb) {
     fallbackCopy(text, cb);
   }
 }
+
 function fallbackCopy(text, cb) {
   const ta = document.createElement("textarea");
   ta.value = text;
@@ -88,6 +78,7 @@ const TB = {
   double: { bg: "rgba(79,124,255,0.18)", bd: "#4f7cff", tx: "#7da8ff", s: "D" },
   triple: { bg: "rgba(255,71,87,0.18)",  bd: "#ff4757", tx: "#ff7b87", s: "T" },
 };
+
 function Tag({ tp }) {
   const c = TB[tp] || TB.single;
   return (
@@ -97,6 +88,28 @@ function Tag({ tp }) {
       marginLeft: 3, verticalAlign: "middle", letterSpacing: 0.5,
     }}>{c.s}</span>
   );
+}
+
+// Adsterra Banner Component
+function AdsterraBanner({ adKey, height = 50, width = 320 }) {
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.atOptions) {
+      window.atOptions = {
+        key: adKey,
+        format: 'iframe',
+        height: height,
+        width: width,
+        params: {}
+      };
+      
+      const script = document.createElement("script");
+      script.src = `https://www.highperformanceformat.com/${adKey}/invoke.js`;
+      script.async = true;
+      document.body.appendChild(script);
+    }
+  }, [adKey, height, width]);
+
+  return <div style={{ textAlign: "center", margin: "10px 0" }} />;
 }
 
 export default function App() {
@@ -109,6 +122,58 @@ export default function App() {
   const [cutIn,  setCutIn]  = useState("");
   const [result, setResult] = useState(null);
   const [toast,  setToast]  = useState("");
+
+  // Load Adsterra Ads
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      // First Adsterra Ad
+      const script1 = document.createElement("script");
+      script1.innerHTML = `
+        window.atOptions = {
+          'key' : '04186cbc5baf73e8902ddcf9b1dc6923',
+          'format' : 'iframe',
+          'height' : 50,
+          'width' : 320,
+          'params' : {}
+        };
+      `;
+      document.head.appendChild(script1);
+
+      const script2 = document.createElement("script");
+      script2.src = "https://www.highperformanceformat.com/04186cbc5baf73e8902ddcf9b1dc6923/invoke.js";
+      script2.async = true;
+      document.head.appendChild(script2);
+
+      // Second Adsterra Ad
+      const script3 = document.createElement("script");
+      script3.src = "https://pl29593481.effectivecpmnetwork.com/e3/a0/01/e3a0016216375272691f7e9dd176b1e3.js";
+      script3.async = true;
+      document.head.appendChild(script3);
+
+      // Adsterra Native Ad with ID 3313991
+      const script4 = document.createElement("script");
+      script4.innerHTML = `
+        window.atOptions = {
+          'key' : '3313991',
+          'format' : 'iframe',
+          'height' : 50,
+          'width' : 320,
+          'params' : {}
+        };
+      `;
+      document.head.appendChild(script4);
+
+      const script5 = document.createElement("script");
+      script5.src = "https://www.highperformanceformat.com/3313991/invoke.js";
+      script5.async = true;
+      document.head.appendChild(script5);
+
+      // Register PWA service worker
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/service-worker.js").catch(() => {});
+      }
+    }
+  }, []);
 
   function switchCat(c) {
     setCat(c); setDigits(new Set()); setTypes(new Set(["all"]));
@@ -161,8 +226,6 @@ export default function App() {
           seen.add(key);
 
           const allPs = perms3(a, b, c);
-          
-          // এখানে প্রতিটা পারমিউটেশনের ওপর আলাদাভাবে কাট পেয়ার চেক হবে
           const ps = cutList.length > 0
             ? allPs.filter(n => !isExcluded(n, cutList))
             : allPs;
@@ -175,7 +238,6 @@ export default function App() {
 
     if (!ramble.length) { pop("No numbers found"); return; }
     
-    // Ramble ভিউতে ডুপ্লিকেট এড়াতে ফিল্টারিং লজিক
     const finalRamble = [];
     const rambleSeen = new Set();
     ramble.forEach(x => {
@@ -202,8 +264,6 @@ export default function App() {
         seen.add(key);
         
         const allPs = a === b ? [`${a}${a}`] : perms2(a, b);
-        
-        // ২D-এর কাট পেয়ার ফিল্টারিং (২D যেমন ছিল তেমনই থাকবে)
         const ps = cutList.length > 0
           ? allPs.filter(n => !isExcluded(n, cutList))
           : allPs;
@@ -319,8 +379,9 @@ export default function App() {
             🔗 Share
           </button>
         </div>
-        
- 
+
+        {/* AD SLOT 1 - Adsterra Banner */}
+        <AdsterraBanner adKey="04186cbc5baf73e8902ddcf9b1dc6923" height={50} width={320} />
 
         {/* CAT TABS */}
         <div style={{ padding: "0 10px 8px", display: "flex", gap: 6 }}>
@@ -609,6 +670,9 @@ export default function App() {
               </>
             )}
           </div>
+
+          {/* AD SLOT 2 - Adsterra Banner with ID 3313991 */}
+          <AdsterraBanner adKey="3313991" height={50} width={320} />
 
           {/* RESET + COPY ALL */}
           <div style={{ display: "flex", gap: 8, paddingBottom: 20 }}>
